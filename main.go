@@ -21,10 +21,10 @@ func main() {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	c := session.DB("test").C("people")
-	n := 50
+	n := 2
 	m := 200000 / n
 	insert(n, m, c)
-	query(n, m, err, c)
+	//query(n, m, err, c)
 }
 
 func insert(n int, m int, c *mgo.Collection) {
@@ -33,20 +33,33 @@ func insert(n int, m int, c *mgo.Collection) {
 	for i := 0; i < n; i++ {
 		go func() {
 			for j := 0; j < m; j++ {
-				c.Insert(&Person{"lgh" + strconv.Itoa(j), "+555381169639"})
+				c.Insert(&Person{"lgh" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"},
+					&Person{"lgh2" + strconv.Itoa(j), "+555381169639"})
+
 			}
 			ch <- 1
 		}()
 	}
-	//for range ch {
-	//	fmt.Println(n)
-	//	if n==1{
-	//		close(ch)
-	//	}
-	//	n--
-	//}
+	for range ch {
+		fmt.Println(n)
+		if n == 1 {
+			close(ch)
+		}
+		n--
+	}
 	cost := time.Since(start)
-	fmt.Println("insert cost=[%s]", cost)
+
+	fmt.Println("insert cost=%s", cost)
+	fmt.Println("insert TPS=%s", 200000/cost)
+	fmt.Println("insert NPS=%s", 2000000/cost)
 }
 
 func query(n int, m int, err error, c *mgo.Collection) {
