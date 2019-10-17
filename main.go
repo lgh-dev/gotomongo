@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	"net/http"
+	_ "net/http/pprof"
 	"strconv"
 	"time"
 )
@@ -14,6 +16,8 @@ type Person struct {
 }
 
 func main() {
+	http.ListenAndServe("0.0.0.0:8899", nil)
+
 	session, err := mgo.Dial("mongodb://localhost")
 	if err != nil {
 		panic(err)
