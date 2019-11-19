@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"net/http"
 	_ "net/http/pprof"
 	"strconv"
 	"time"
@@ -16,22 +15,23 @@ type Person struct {
 }
 
 func main() {
-	http.ListenAndServe("0.0.0.0:8899", nil)
+	//http.ListenAndServe("0.0.0.0:8899", nil)
 
-	session, err := mgo.Dial("mongodb://localhost")
+	session, err := mgo.Dial("mongodb://192.168.1.57:28018")
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	c := session.DB("test").C("people")
-	n := 2
-	m := 200000 / n
-	insert(n, m, c)
+	total := 20000
+	n := 10
+	m := total / n
+	insert(n, m, total, c)
 	//query(n, m, err, c)
 }
 
-func insert(n int, m int, c *mgo.Collection) {
+func insert(n int, m int, total int, c *mgo.Collection) {
 	start := time.Now()
 	ch := make(chan int)
 	for i := 0; i < n; i++ {
@@ -61,9 +61,9 @@ func insert(n int, m int, c *mgo.Collection) {
 	}
 	cost := time.Since(start)
 
-	fmt.Println("insert cost=%s", cost)
-	fmt.Println("insert TPS=%s", 200000/cost)
-	fmt.Println("insert NPS=%s", 2000000/cost)
+	fmt.Printf("insert cost=%.2f\n秒", cost.Seconds())
+	fmt.Printf("insert TPS=%.2f\n", float64(total)/cost.Seconds())
+	fmt.Printf("insert NPS=%.2f\n", float64(total*10)/cost.Seconds())
 }
 
 func query(n int, m int, err error, c *mgo.Collection) {
